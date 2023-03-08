@@ -35,7 +35,7 @@ const displayController = (() => {
   const o = document.querySelector(".oButton");
   const board = document.querySelector("#board");
   playbutton.addEventListener("click", () => {
-    for (i = 1; i <= 9; i++) {
+    /*for (i = 1; i <= 9; i++) {
       let cell = document.createElement("div");
       cell.style.backgroundColor = "white";
       board.appendChild(cell);
@@ -43,6 +43,19 @@ const displayController = (() => {
       cell.addEventListener("click", () => {
         cell.textContent = game.getActivePlayer().getSelection();
       });
+    }*/
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        let cell = document.createElement("div");
+        board.appendChild(cell);
+        board.style.backgroundColor = "black";
+        cell.style.backgroundColor = "white";
+        cell.addEventListener("click", () => {
+          game.gameboard[i][j] = game.getActivePlayer().getSelection();
+          cell.textContent = game.gameboard[i][j];
+        });
+      }
     }
   });
   x.addEventListener("click", () => {
