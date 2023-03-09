@@ -26,7 +26,62 @@ const game = (() => {
     return activePlayer;
   };
 
-  return { gameboard, firstPlayer, getActivePlayer, secondPlayer, players };
+  const checkWinner = () => {
+    let value;
+    let winner;
+    let isFull = true;
+    let isComplete;
+    const possibilities = [
+      [gameboard[0][0], gameboard[0][1], gameboard[0][2]],
+      [gameboard[1][0], gameboard[1][1], gameboard[1][2]],
+      [gameboard[2][0], gameboard[2][1], gameboard[2][2]],
+      [gameboard[0][0], gameboard[1][0], gameboard[2][0]],
+      [gameboard[0][1], gameboard[1][1], gameboard[2][1]],
+      [gameboard[0][2], gameboard[1][2], gameboard[2][2]],
+      [gameboard[0][0], gameboard[1][1], gameboard[2][2]],
+      [gameboard[0][2], gameboard[1][1], gameboard[2][0]],
+    ];
+
+    for (let i = 0; i < possibilities.length; i++) {
+      value = "";
+
+      const matched = possibilities[i].every((item) => {
+        value = item;
+        return item === possibilities[i][0];
+      });
+
+      isFull = possibilities[i].every((item) => {
+        return typeof item === "string";
+      });
+
+      if (isFull === false) {
+        isComplete = false;
+      }
+
+      if (value === "x" && matched && isFull) {
+        winner = "x";
+        break;
+      } else if (value === "o" && matched && isFull) {
+        winner = "o";
+        break;
+      }
+    }
+
+    if (isComplete && !matched) {
+      winner = "Tie";
+    }
+
+    return winner;
+  };
+
+  return {
+    gameboard,
+    firstPlayer,
+    getActivePlayer,
+    secondPlayer,
+    players,
+    checkWinner,
+  };
 })();
 
 const displayController = (() => {
@@ -35,16 +90,6 @@ const displayController = (() => {
   const o = document.querySelector(".oButton");
   const board = document.querySelector("#board");
   playbutton.addEventListener("click", () => {
-    /*for (i = 1; i <= 9; i++) {
-      let cell = document.createElement("div");
-      cell.style.backgroundColor = "white";
-      board.appendChild(cell);
-      board.style.backgroundColor = "black";
-      cell.addEventListener("click", () => {
-        cell.textContent = game.getActivePlayer().getSelection();
-      });
-    }*/
-
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         let cell = document.createElement("div");
@@ -52,8 +97,11 @@ const displayController = (() => {
         board.style.backgroundColor = "black";
         cell.style.backgroundColor = "white";
         cell.addEventListener("click", () => {
-          game.gameboard[i][j] = game.getActivePlayer().getSelection();
-          cell.textContent = game.gameboard[i][j];
+          if (cell.textContent === "") {
+            game.gameboard[i][j] = game.getActivePlayer().getSelection();
+            cell.textContent = game.gameboard[i][j];
+            game.checkWinner();
+          }
         });
       }
     }
