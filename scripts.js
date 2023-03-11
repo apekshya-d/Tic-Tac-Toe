@@ -74,7 +74,10 @@ const game = (() => {
     return winner;
   };
 
+  let stage;
+
   return {
+    stage,
     gameboard,
     firstPlayer,
     getActivePlayer,
@@ -85,34 +88,87 @@ const game = (() => {
 })();
 
 const displayController = (() => {
-  const playbutton = document.querySelector(".playButton");
-  const x = document.querySelector(".xButton");
-  const o = document.querySelector(".oButton");
-  const board = document.querySelector("#board");
-  playbutton.addEventListener("click", () => {
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        let cell = document.createElement("div");
-        board.appendChild(cell);
-        board.style.backgroundColor = "black";
-        cell.style.backgroundColor = "white";
-        cell.addEventListener("click", () => {
-          if (cell.textContent === "") {
-            game.gameboard[i][j] = game.getActivePlayer().getSelection();
-            cell.textContent = game.gameboard[i][j];
-            game.checkWinner();
-          }
-        });
-      }
-    }
+  const firstPage = document.querySelector(".firstPage");
+  const twoPlayers = document.querySelector("#twoPlayers");
+  twoPlayers.addEventListener("click", () => {
+    game.stage = "tokenSelection";
+    render();
   });
-  x.addEventListener("click", () => {
-    game.players[0].setSelection("x");
-    game.players[1].setSelection("o");
-  });
+  const gamePage = document.querySelector("#gamePage");
 
-  o.addEventListener("click", () => {
-    game.players[0].setSelection("o");
-    game.players[1].setSelection("x");
-  });
+  const render = () => {
+    switch (game.stage) {
+      case "initial":
+        gamePage.innerHTML = "";
+        firstPage.classList.remove("hide");
+        break;
+
+      case "tokenSelection":
+        const iconSelectMessage = document.createElement("p");
+        iconSelectMessage.textContent = "choose one";
+        const x = document.createElement("button");
+        x.textContent = "x";
+        const o = document.createElement("button");
+        o.textContent = "o";
+        const startGameBtn = document.createElement("Button");
+        startGameBtn.textContent = "start game";
+        startGameBtn.classList.add("hide");
+        startGameBtn.addEventListener("click", () => {
+          game.stage = "gameMode";
+          render();
+        });
+        x.addEventListener("click", () => {
+          game.players[0].setSelection("x");
+          game.players[1].setSelection("o");
+          startGameBtn.classList.remove("hide");
+        });
+
+        o.addEventListener("click", () => {
+          game.players[0].setSelection("o");
+          game.players[1].setSelection("x");
+          startGameBtn.classList.remove("hide");
+        });
+        gamePage.append(iconSelectMessage, x, o, startGameBtn);
+        break;
+
+      case "gameMode":
+        gamePage.innerHTML = "";
+        firstPage.classList.add("hide");
+        const board = document.createElement("div");
+        board.classList.add("board");
+        const mainButton = document.createElement("button");
+        mainButton.textContent = "Main Page";
+        mainButton.addEventListener("click", () => {
+          game.gameboard = [[], [], []];
+          game.stage = "initial";
+          render();
+        });
+        const replay = document.createElement("button");
+        replay.textContent = "replay";
+        replay.addEventListener("click", () => {
+          game.gameboard = [[], [], []];
+          render();
+        });
+
+        gamePage.append(replay, mainButton, board);
+        board.style.backgroundColor = "black";
+
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            let cell = document.createElement("div");
+            board.appendChild(cell);
+            cell.style.backgroundColor = "white";
+            cell.textContent = game.gameboard[i][j];
+            cell.addEventListener("click", () => {
+              if (cell.textContent === "") {
+                game.gameboard[i][j] = game.getActivePlayer().getSelection();
+                game.checkWinner();
+                render();
+              }
+            });
+          }
+        }
+        break;
+    }
+  };
 })();
