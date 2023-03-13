@@ -21,19 +21,19 @@ const game = (() => {
   const firstPlayer = players[0];
   const secondPlayer = players[1];
   let winner;
-  let activePlayer;
-  let getActivePlayer = () => {
+  let activePlayer = firstPlayer;
+  const getActivePlayer = () => activePlayer;
+  let getNextPlayer = () => {
     if (activePlayer === firstPlayer) {
       activePlayer = secondPlayer;
     } else {
       activePlayer = firstPlayer;
     }
-    return activePlayer;
   };
 
   const resetGame = () => {
     gameboard.splice(0, 3, [], [], []);
-    activePlayer = undefined;
+    activePlayer = firstPlayer;
     winner = undefined;
   };
 
@@ -95,6 +95,7 @@ const game = (() => {
     resetGame,
     firstPlayer,
     getActivePlayer,
+    getNextPlayer,
     secondPlayer,
     players,
     checkWinner,
@@ -119,6 +120,7 @@ const displayController = (() => {
         break;
 
       case "playerSelection":
+        gamePage.innerHTML = "";
         const iconSelectMessage = document.createElement("p");
         let playerOne = document.createElement("input");
         playerOne.setAttribute("placeholder", "Player one name");
@@ -192,7 +194,12 @@ const displayController = (() => {
           render();
         });
 
-        gamePage.append(replay, mainButton, board);
+        const playerTurn = document.createElement("p");
+        playerTurn.textContent = `It's ${game
+          .getActivePlayer()
+          .getName()}'s turn`;
+
+        gamePage.append(playerTurn, replay, mainButton, board);
         board.style.backgroundColor = "black";
 
         for (let i = 0; i < 3; i++) {
@@ -204,6 +211,7 @@ const displayController = (() => {
             cell.addEventListener("click", () => {
               if (cell.textContent === "") {
                 game.gameboard[i][j] = game.getActivePlayer().getSelection();
+                game.getNextPlayer();
                 render();
                 game.checkWinner();
                 render();
