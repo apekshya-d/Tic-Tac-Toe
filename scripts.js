@@ -16,6 +16,7 @@ const game = (() => {
   const players = [Player("a"), Player("b")];
   const firstPlayer = players[0];
   const secondPlayer = players[1];
+  let winner;
   let activePlayer;
   let getActivePlayer = () => {
     if (activePlayer === firstPlayer) {
@@ -26,11 +27,16 @@ const game = (() => {
     return activePlayer;
   };
 
+  const resetGame = () => {
+    gameboard.splice(0, 3, [], [], []);
+    activePlayer = undefined;
+    winner = undefined;
+  };
+
   const checkWinner = () => {
-    let value;
-    let winner;
     let isFull = true;
-    let isComplete;
+    let isComplete = true;
+    let matched;
     const possibilities = [
       [gameboard[0][0], gameboard[0][1], gameboard[0][2]],
       [gameboard[1][0], gameboard[1][1], gameboard[1][2]],
@@ -43,9 +49,8 @@ const game = (() => {
     ];
 
     for (let i = 0; i < possibilities.length; i++) {
-      value = "";
-
-      const matched = possibilities[i].every((item) => {
+      let value;
+      matched = possibilities[i].every((item) => {
         value = item;
         return item === possibilities[i][0];
       });
@@ -71,19 +76,25 @@ const game = (() => {
       winner = "Tie";
     }
 
-    return winner;
+    if (winner !== undefined) {
+      game.stage = "gameOver";
+    }
   };
 
   let stage;
 
+  const getWinner = () => winner;
+
   return {
     stage,
     gameboard,
+    resetGame,
     firstPlayer,
     getActivePlayer,
     secondPlayer,
     players,
     checkWinner,
+    getWinner,
   };
 })();
 
@@ -139,14 +150,14 @@ const displayController = (() => {
         const mainButton = document.createElement("button");
         mainButton.textContent = "Main Page";
         mainButton.addEventListener("click", () => {
-          game.gameboard = [[], [], []];
+          game.resetGame();
           game.stage = "initial";
           render();
         });
         const replay = document.createElement("button");
         replay.textContent = "replay";
         replay.addEventListener("click", () => {
-          game.gameboard = [[], [], []];
+          game.resetGame();
           render();
         });
 
@@ -162,12 +173,23 @@ const displayController = (() => {
             cell.addEventListener("click", () => {
               if (cell.textContent === "") {
                 game.gameboard[i][j] = game.getActivePlayer().getSelection();
+                render();
                 game.checkWinner();
                 render();
               }
             });
           }
         }
+        break;
+      case "gameOver":
+        const winnerAnnouncement = document.createElement("dialog");
+        gamePage.appendChild(winnerAnnouncement);
+        winnerAnnouncement.classList.add("dialog");
+        winnerAnnouncement.showModal();
+        winnerAnnouncement.textContent = `The winner is ${game.getWinner()}`;
+        winnerAnnouncement.addEventListener("click", () =>
+          winnerAnnouncement.close()
+        );
         break;
     }
   };
