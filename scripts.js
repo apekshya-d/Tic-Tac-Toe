@@ -217,7 +217,13 @@ const displayController = (() => {
         gamePage.appendChild(winnerAnnouncement);
         winnerAnnouncement.classList.add("dialog");
         winnerAnnouncement.showModal();
-        winnerAnnouncement.textContent = `The winner is ${game.getWinner()}`;
+        if (game.getWinner() === game.firstPlayer.getSelection()) {
+          winnerAnnouncement.textContent = `The winner is ${game.firstPlayer.getName()}`;
+        } else if (game.getWinner() === game.secondPlayer.getSelection()) {
+          winnerAnnouncement.textContent = `The winner is ${game.secondPlayer.getName()}`;
+        } else {
+          winnerAnnouncement.textContent = "It's a Tie!";
+        }
         winnerAnnouncement.addEventListener("click", () =>
           winnerAnnouncement.close()
         );
