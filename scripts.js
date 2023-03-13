@@ -1,5 +1,9 @@
-const Player = (name) => {
+const Player = () => {
   let selectedOption;
+  let name;
+  const setName = (n) => {
+    name = n;
+  };
   const getName = () => name;
   const getSelection = () => {
     return selectedOption;
@@ -8,12 +12,12 @@ const Player = (name) => {
     selectedOption = selection;
   };
 
-  return { getName, getSelection, setSelection };
+  return { getName, getSelection, setSelection, setName };
 };
 
 const game = (() => {
   const gameboard = [[], [], []];
-  const players = [Player("a"), Player("b")];
+  const players = [Player(), Player()];
   const firstPlayer = players[0];
   const secondPlayer = players[1];
   let winner;
@@ -102,7 +106,7 @@ const displayController = (() => {
   const firstPage = document.querySelector(".firstPage");
   const twoPlayers = document.querySelector("#twoPlayers");
   twoPlayers.addEventListener("click", () => {
-    game.stage = "tokenSelection";
+    game.stage = "playerSelection";
     render();
   });
   const gamePage = document.querySelector("#gamePage");
@@ -114,13 +118,39 @@ const displayController = (() => {
         firstPage.classList.remove("hide");
         break;
 
-      case "tokenSelection":
+      case "playerSelection":
         const iconSelectMessage = document.createElement("p");
-        iconSelectMessage.textContent = "choose one";
+        let playerOne = document.createElement("input");
+        playerOne.setAttribute("placeholder", "Player one name");
+        playerOne.addEventListener("input", () => {
+          let playerOneName = playerOne.value;
+          game.firstPlayer.setName(playerOneName);
+          if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
+            iconSelectMessage.textContent = `${game.firstPlayer.getName()} choose one:`;
+            x.classList.remove("hide");
+            o.classList.remove("hide");
+          }
+        });
+
+        let playerTwo = document.createElement("input");
+        playerTwo.setAttribute("placeholder", "Player Two name");
+        gamePage.append(playerOne, playerTwo);
+        playerTwo.addEventListener("input", () => {
+          let playerTwoName = playerTwo.value;
+          game.secondPlayer.setName(playerTwoName);
+          if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
+            iconSelectMessage.textContent = `${game.firstPlayer.getName()} choose one:`;
+            x.classList.remove("hide");
+            o.classList.remove("hide");
+          }
+        });
+
         const x = document.createElement("button");
+        x.classList.add("hide");
         x.textContent = "x";
         const o = document.createElement("button");
         o.textContent = "o";
+        o.classList.add("hide");
         const startGameBtn = document.createElement("Button");
         startGameBtn.textContent = "start game";
         startGameBtn.classList.add("hide");
@@ -158,6 +188,7 @@ const displayController = (() => {
         replay.textContent = "replay";
         replay.addEventListener("click", () => {
           game.resetGame();
+          game.stage = "gameMode";
           render();
         });
 
