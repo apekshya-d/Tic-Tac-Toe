@@ -122,40 +122,44 @@ const displayController = (() => {
       case "playerSelection":
         gamePage.innerHTML = "";
         const iconSelectMessage = document.createElement("p");
+        const playerInputContainer = document.createElement("div");
+        playerInputContainer.classList.add("playerInputContainer");
         let playerOne = document.createElement("input");
         playerOne.setAttribute("placeholder", "Player one name");
         playerOne.addEventListener("input", () => {
           let playerOneName = playerOne.value;
           game.firstPlayer.setName(playerOneName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
-            iconSelectMessage.textContent = `${game.firstPlayer.getName()} choose one:`;
-            x.classList.remove("hide");
-            o.classList.remove("hide");
+            iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
+            xoContainer.classList.remove("hide");
           }
         });
 
         let playerTwo = document.createElement("input");
         playerTwo.setAttribute("placeholder", "Player Two name");
-        gamePage.append(playerOne, playerTwo);
+        playerInputContainer.append(playerOne, playerTwo);
         playerTwo.addEventListener("input", () => {
           let playerTwoName = playerTwo.value;
           game.secondPlayer.setName(playerTwoName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
-            iconSelectMessage.textContent = `${game.firstPlayer.getName()} choose one:`;
-            x.classList.remove("hide");
-            o.classList.remove("hide");
+            iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
+            xoContainer.classList.remove("hide");
           }
         });
-
+        const xoContainer = document.createElement("div");
+        xoContainer.classList.add("xoContainer");
         const x = document.createElement("button");
-        x.classList.add("hide");
         x.textContent = "x";
         const o = document.createElement("button");
         o.textContent = "o";
-        o.classList.add("hide");
+        xoContainer.classList.add("hide");
+        xoContainer.append(x, o);
+        const startGameBtnContainer = document.createElement("div");
         const startGameBtn = document.createElement("Button");
-        startGameBtn.textContent = "start game";
-        startGameBtn.classList.add("hide");
+        startGameBtn.textContent = "Let's Play";
+        startGameBtnContainer.classList.add("hide");
+        startGameBtnContainer.classList.add("startGameBtnContainer");
+        startGameBtnContainer.appendChild(startGameBtn);
         startGameBtn.addEventListener("click", () => {
           game.stage = "gameMode";
           render();
@@ -163,15 +167,24 @@ const displayController = (() => {
         x.addEventListener("click", () => {
           game.players[0].setSelection("x");
           game.players[1].setSelection("o");
-          startGameBtn.classList.remove("hide");
+          startGameBtnContainer.classList.remove("hide");
+          x.classList.add("selected");
+          o.classList.remove("selected");
         });
 
         o.addEventListener("click", () => {
           game.players[0].setSelection("o");
           game.players[1].setSelection("x");
-          startGameBtn.classList.remove("hide");
+          startGameBtnContainer.classList.remove("hide");
+          o.classList.add("selected");
+          x.classList.remove("selected");
         });
-        gamePage.append(iconSelectMessage, x, o, startGameBtn);
+        gamePage.append(
+          playerInputContainer,
+          iconSelectMessage,
+          xoContainer,
+          startGameBtnContainer
+        );
         break;
 
       case "gameMode":
@@ -179,15 +192,17 @@ const displayController = (() => {
         firstPage.classList.add("hide");
         const board = document.createElement("div");
         board.classList.add("board");
+        const gameModeBtnContainer = document.createElement("div");
+        gameModeBtnContainer.classList.add("gameModeBtnContainer");
         const mainButton = document.createElement("button");
-        mainButton.textContent = "Main Page";
+        mainButton.classList.add("mainBtn");
         mainButton.addEventListener("click", () => {
           game.resetGame();
           game.stage = "initial";
           render();
         });
         const replay = document.createElement("button");
-        replay.textContent = "replay";
+        replay.classList.add("replayBtn");
         replay.addEventListener("click", () => {
           game.resetGame();
           game.stage = "gameMode";
@@ -199,14 +214,13 @@ const displayController = (() => {
           .getActivePlayer()
           .getName()}'s turn`;
 
-        gamePage.append(playerTurn, replay, mainButton, board);
-        board.style.backgroundColor = "black";
+        gameModeBtnContainer.append(replay, mainButton);
+        gamePage.append(gameModeBtnContainer, playerTurn, board);
 
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
             let cell = document.createElement("div");
             board.appendChild(cell);
-            cell.style.backgroundColor = "white";
             cell.textContent = game.gameboard[i][j];
             cell.addEventListener("click", () => {
               if (cell.textContent === "") {
@@ -221,9 +235,15 @@ const displayController = (() => {
         }
         break;
       case "gameOver":
+        let existingDialog = document.querySelector(".dialog");
+        if (existingDialog) {
+          existingDialog.remove();
+        }
+        const main = document.querySelector(".main");
         const winnerAnnouncement = document.createElement("dialog");
         gamePage.appendChild(winnerAnnouncement);
         winnerAnnouncement.classList.add("dialog");
+        main.classList.add("blur");
         winnerAnnouncement.showModal();
         if (game.getWinner() === game.firstPlayer.getSelection()) {
           winnerAnnouncement.textContent = `The winner is ${game.firstPlayer.getName()}`;
@@ -232,9 +252,10 @@ const displayController = (() => {
         } else {
           winnerAnnouncement.textContent = "It's a Tie!";
         }
-        winnerAnnouncement.addEventListener("click", () =>
-          winnerAnnouncement.close()
-        );
+        winnerAnnouncement.addEventListener("click", () => {
+          main.classList.remove("blur");
+          winnerAnnouncement.close();
+        });
         break;
     }
   };
