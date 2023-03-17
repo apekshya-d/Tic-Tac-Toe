@@ -126,6 +126,7 @@ const displayController = (() => {
         playerInputContainer.classList.add("playerInputContainer");
         let playerOne = document.createElement("input");
         playerOne.setAttribute("placeholder", "Player one name");
+        playerOne.setAttribute("maxlength", "10");
         playerOne.addEventListener("input", () => {
           let playerOneName = playerOne.value;
           game.firstPlayer.setName(playerOneName);
@@ -137,6 +138,7 @@ const displayController = (() => {
 
         let playerTwo = document.createElement("input");
         playerTwo.setAttribute("placeholder", "Player Two name");
+        playerTwo.setAttribute("maxlength", "10");
         playerInputContainer.append(playerOne, playerTwo);
         playerTwo.addEventListener("input", () => {
           let playerTwoName = playerTwo.value;
@@ -246,9 +248,9 @@ const displayController = (() => {
         main.classList.add("blur");
         winnerAnnouncement.showModal();
         if (game.getWinner() === game.firstPlayer.getSelection()) {
-          winnerAnnouncement.textContent = `The winner is ${game.firstPlayer.getName()}`;
+          winnerAnnouncement.textContent = `The winner is ${game.firstPlayer.getName()}.`;
         } else if (game.getWinner() === game.secondPlayer.getSelection()) {
-          winnerAnnouncement.textContent = `The winner is ${game.secondPlayer.getName()}`;
+          winnerAnnouncement.textContent = `The winner is ${game.secondPlayer.getName()}.`;
         } else {
           winnerAnnouncement.textContent = "It's a Tie!";
         }
