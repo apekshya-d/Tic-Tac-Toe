@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 const Player = () => {
   let selectedOption;
   let name;
@@ -5,9 +6,7 @@ const Player = () => {
     name = n;
   };
   const getName = () => name;
-  const getSelection = () => {
-    return selectedOption;
-  };
+  const getSelection = () => selectedOption;
   const setSelection = (selection) => {
     selectedOption = selection;
   };
@@ -23,7 +22,7 @@ const game = (() => {
   let winner;
   let activePlayer = firstPlayer;
   const getActivePlayer = () => activePlayer;
-  let getNextPlayer = () => {
+  const getNextPlayer = () => {
     if (activePlayer === firstPlayer) {
       activePlayer = secondPlayer;
     } else {
@@ -59,9 +58,7 @@ const game = (() => {
         return item === possibilities[i][0];
       });
 
-      isFull = possibilities[i].every((item) => {
-        return typeof item === "string";
-      });
+      isFull = possibilities[i].every((item) => typeof item === "string");
 
       if (isFull === false) {
         isComplete = false;
@@ -103,11 +100,12 @@ const game = (() => {
   };
 })();
 
-const displayController = (() => {
+(() => {
   const firstPage = document.querySelector(".firstPage");
   const twoPlayers = document.querySelector("#twoPlayers");
   twoPlayers.addEventListener("click", () => {
     game.stage = "playerSelection";
+    // eslint-disable-next-line no-use-before-define
     render();
   });
   const gamePage = document.querySelector("#gamePage");
@@ -119,32 +117,34 @@ const displayController = (() => {
         firstPage.classList.remove("hide");
         break;
 
-      case "playerSelection":
+      case "playerSelection": {
         gamePage.innerHTML = "";
         const iconSelectMessage = document.createElement("p");
         const playerInputContainer = document.createElement("div");
         playerInputContainer.classList.add("playerInputContainer");
-        let playerOne = document.createElement("input");
+        const playerOne = document.createElement("input");
         playerOne.setAttribute("placeholder", "Player one name");
         playerOne.setAttribute("maxlength", "10");
         playerOne.addEventListener("input", () => {
-          let playerOneName = playerOne.value;
+          const playerOneName = playerOne.value;
           game.firstPlayer.setName(playerOneName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
             iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
+            // eslint-disable-next-line no-use-before-define
             xoContainer.classList.remove("hide");
           }
         });
 
-        let playerTwo = document.createElement("input");
+        const playerTwo = document.createElement("input");
         playerTwo.setAttribute("placeholder", "Player Two name");
         playerTwo.setAttribute("maxlength", "10");
         playerInputContainer.append(playerOne, playerTwo);
         playerTwo.addEventListener("input", () => {
-          let playerTwoName = playerTwo.value;
+          const playerTwoName = playerTwo.value;
           game.secondPlayer.setName(playerTwoName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
             iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
+            // eslint-disable-next-line no-use-before-define
             xoContainer.classList.remove("hide");
           }
         });
@@ -187,9 +187,11 @@ const displayController = (() => {
           xoContainer,
           startGameBtnContainer
         );
-        break;
 
-      case "gameMode":
+        break;
+      }
+
+      case "gameMode": {
         gamePage.innerHTML = "";
         firstPage.classList.add("hide");
         const board = document.createElement("div");
@@ -221,7 +223,7 @@ const displayController = (() => {
 
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
-            let cell = document.createElement("div");
+            const cell = document.createElement("div");
             board.appendChild(cell);
             cell.textContent = game.gameboard[i][j];
             cell.addEventListener("click", () => {
@@ -236,8 +238,9 @@ const displayController = (() => {
           }
         }
         break;
-      case "gameOver":
-        let existingDialog = document.querySelector(".dialog");
+      }
+      case "gameOver": {
+        const existingDialog = document.querySelector(".dialog");
         if (existingDialog) {
           existingDialog.remove();
         }
@@ -258,6 +261,10 @@ const displayController = (() => {
           main.classList.remove("blur");
           winnerAnnouncement.close();
         });
+        break;
+      }
+
+      default:
         break;
     }
   };
