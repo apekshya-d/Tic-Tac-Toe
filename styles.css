@@ -104,6 +104,13 @@ h1{
     justify-content: space-around;
 }
 
+.AiInputContainer {
+    margin-top: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 input {
     width: 40%;
     height: 25px;
