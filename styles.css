@@ -240,6 +240,10 @@ input {
 
 }
 
+.board .winningRow {
+    background-color: rgb(102, 208, 93);
+}
+
 
 @media (max-width : 375px){
     #tic {

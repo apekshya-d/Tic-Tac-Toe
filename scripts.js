@@ -23,6 +23,7 @@ const Player = () => {
 
 const game = (() => {
   const gameboard = [[], [], []];
+  let winningRow = [];
   let stage;
   const players = [Player(), Player()];
   const firstPlayer = players[0];
@@ -40,13 +41,17 @@ const game = (() => {
   const resetGame = () => {
     gameboard.splice(0, 3, [], [], []);
     activePlayer = firstPlayer;
+    winningRow = [];
   };
+  const getWinningRow = () => winningRow;
 
   const checkWinner = () => {
+    winningRow = [];
     let winner;
     let isFull = true;
     let isComplete = true;
     let matched;
+
     const possibilities = [
       [gameboard[0][0], gameboard[0][1], gameboard[0][2]],
       [gameboard[1][0], gameboard[1][1], gameboard[1][2]],
@@ -56,6 +61,17 @@ const game = (() => {
       [gameboard[0][2], gameboard[1][2], gameboard[2][2]],
       [gameboard[0][0], gameboard[1][1], gameboard[2][2]],
       [gameboard[0][2], gameboard[1][1], gameboard[2][0]],
+    ];
+
+    const winningRowsPossibilities = [
+      ["00", "01", "02"],
+      ["10", "11", "12"],
+      ["20", "21", "22"],
+      ["00", "10", "20"],
+      ["01", "11", "21"],
+      ["02", "12", "22"],
+      ["00", "11", "22"],
+      ["02", "11", "20"],
     ];
 
     for (let i = 0; i < possibilities.length; i++) {
@@ -73,9 +89,12 @@ const game = (() => {
 
       if (value === "x" && matched && isFull) {
         winner = "x";
+        winningRow = winningRowsPossibilities[i];
+
         break;
       } else if (value === "o" && matched && isFull) {
         winner = "o";
+        winningRow = winningRowsPossibilities[i];
         break;
       }
     }
@@ -84,14 +103,6 @@ const game = (() => {
       winner = "Tie";
     }
 
-    return winner;
-  };
-
-  const getWinner = () => {
-    const winner = checkWinner();
-    if (winner !== undefined) {
-      game.stage = "gameOver";
-    }
     return winner;
   };
 
@@ -172,8 +183,9 @@ const game = (() => {
     getNextPlayer,
     secondPlayer,
     players,
-    getWinner,
+    checkWinner,
     playAiMove,
+    getWinningRow,
   };
 })();
 
@@ -213,6 +225,7 @@ const game = (() => {
     startGameBtnContainer.appendChild(startGameBtn);
     startGameBtn.addEventListener("click", () => {
       game.stage = "gameMode";
+      // eslint-disable-next-line no-use-before-define
       render();
     });
     x.addEventListener("click", () => {
@@ -329,6 +342,7 @@ const game = (() => {
         });
 
         const playerTurn = document.createElement("p");
+        playerTurn.classList.add("playerTurn");
         playerTurn.textContent = `It's ${game
           .getActivePlayer()
           .getName()}'s turn`;
@@ -349,23 +363,31 @@ const game = (() => {
               if (cell.textContent === "") {
                 game.gameboard[i][j] = game.getActivePlayer().getSelection();
                 game.getNextPlayer();
+                let winner = game.checkWinner();
                 render();
-                game.getWinner();
-                render();
+
                 // if ai mode:
-                if (game.players[1].getIsAI() && game.stage !== "gameOver") {
+                if (game.players[1].getIsAI() && !winner) {
                   game.playAiMove();
+                  winner = game.checkWinner();
                   render();
-                  game.getWinner();
+                }
+                if (winner !== undefined) {
+                  game.stage = "gameOver";
                   render();
                 }
               }
             });
+            if (game.getWinningRow().includes(`${i}${j}`)) {
+              cell.classList.add("winningRow");
+            }
           }
         }
         break;
       }
+
       case "gameOver": {
+        document.querySelector(".playerTurn").classList.remove("hide");
         const existingDialog = document.querySelector(".dialog");
         if (existingDialog) {
           existingDialog.remove();
@@ -376,12 +398,19 @@ const game = (() => {
         winnerAnnouncement.classList.add("dialog");
         main.classList.add("blur");
         winnerAnnouncement.showModal();
-        if (game.getWinner() === game.firstPlayer.getSelection()) {
+        if (game.checkWinner() === game.firstPlayer.getSelection()) {
           winnerAnnouncement.textContent = `The winner is ${game.firstPlayer.getName()}.`;
-        } else if (game.getWinner() === game.secondPlayer.getSelection()) {
+          document.querySelector(
+            ".playerTurn"
+          ).textContent = `The winner is ${game.firstPlayer.getName()}.`;
+        } else if (game.checkWinner() === game.secondPlayer.getSelection()) {
           winnerAnnouncement.textContent = `The winner is ${game.secondPlayer.getName()}.`;
+          document.querySelector(
+            ".playerTurn"
+          ).textContent = `The winner is ${game.secondPlayer.getName()}.`;
         } else {
           winnerAnnouncement.textContent = "It's a Tie!";
+          document.querySelector(".playerTurn").textContent = "It's a Tie!";
         }
         winnerAnnouncement.addEventListener("click", () => {
           main.classList.remove("blur");
