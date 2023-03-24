@@ -65,7 +65,7 @@ h1{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 35px;
+    gap: 30px;
     margin-top: 30px;
 }
 
@@ -247,7 +247,6 @@ input {
 
 @media (max-width : 375px){
     #tic {
-        margin-top: ;
         padding-left: 7%;
     }
 
