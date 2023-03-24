@@ -195,6 +195,10 @@ const game = (() => {
   const twoPlayers = document.querySelector("#twoPlayers");
   twoPlayers.addEventListener("click", () => {
     game.stage = "twoPlayerMode";
+
+    twoPlayers.classList.add("selected");
+    // eslint-disable-next-line no-use-before-define
+    playAI.classList.remove("selected");
     // eslint-disable-next-line no-use-before-define
     render();
   });
@@ -202,6 +206,8 @@ const game = (() => {
   const playAI = document.querySelector("#playAI");
   playAI.addEventListener("click", () => {
     game.stage = "aiMode";
+    playAI.classList.add("selected");
+    twoPlayers.classList.remove("selected");
     // eslint-disable-next-line no-use-before-define
     render();
   });
