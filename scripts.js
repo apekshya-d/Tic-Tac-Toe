@@ -23,6 +23,7 @@ const Player = () => {
 
 const game = (() => {
   const gameboard = [[], [], []];
+  let stage;
   const players = [Player(), Player()];
   const firstPlayer = players[0];
   const secondPlayer = players[1];
@@ -94,7 +95,7 @@ const game = (() => {
     return winner;
   };
 
-  function minimax(board, depth, isMaximizing) {
+  function minimax(isMaximizing) {
     const scores = {
       [secondPlayer.getSelection()]: 1,
       [firstPlayer.getSelection()]: -1,
@@ -114,7 +115,7 @@ const game = (() => {
         for (let j = 0; j < 3; j++) {
           if (!gameboard[i][j]) {
             gameboard[i][j] = secondPlayer.getSelection();
-            const score = minimax(gameboard, depth + 1, false);
+            const score = minimax(false);
             gameboard[i][j] = undefined;
             bestScore = Math.max(score, bestScore);
           }
@@ -126,7 +127,7 @@ const game = (() => {
         for (let j = 0; j < 3; j++) {
           if (!gameboard[i][j]) {
             gameboard[i][j] = firstPlayer.getSelection();
-            const score = minimax(gameboard, depth + 1, true);
+            const score = minimax(true);
             gameboard[i][j] = undefined;
             bestScore = Math.min(score, bestScore);
           }
@@ -144,7 +145,7 @@ const game = (() => {
       for (let j = 0; j < 3; j++) {
         if (!gameboard[i][j]) {
           gameboard[i][j] = secondPlayer.getSelection();
-          const score = minimax(gameboard, 0, false);
+          const score = minimax(false);
           gameboard[i][j] = undefined;
           bestScore = Math.max(score, bestScore);
           if (bestScore === score) {
@@ -162,8 +163,6 @@ const game = (() => {
     getNextPlayer();
   };
 
-  let stage;
-
   return {
     stage,
     gameboard,
@@ -173,7 +172,6 @@ const game = (() => {
     getNextPlayer,
     secondPlayer,
     players,
-    checkWinner,
     getWinner,
     playAiMove,
   };
@@ -181,6 +179,7 @@ const game = (() => {
 
 (() => {
   const firstPage = document.querySelector(".firstPage");
+  const gamePage = document.querySelector("#gamePage");
   const twoPlayers = document.querySelector("#twoPlayers");
   twoPlayers.addEventListener("click", () => {
     game.stage = "twoPlayerMode";
@@ -194,7 +193,46 @@ const game = (() => {
     // eslint-disable-next-line no-use-before-define
     render();
   });
-  const gamePage = document.querySelector("#gamePage");
+
+  const appendPlayerSelection = () => {
+    const iconSelectMessage = document.createElement("p");
+    iconSelectMessage.classList.add("iconSelectMessage");
+    const xoContainer = document.createElement("div");
+    xoContainer.classList.add("xoContainer");
+    const x = document.createElement("button");
+    x.textContent = "x";
+    const o = document.createElement("button");
+    o.textContent = "o";
+    xoContainer.classList.add("hide");
+    xoContainer.append(x, o);
+    const startGameBtnContainer = document.createElement("div");
+    const startGameBtn = document.createElement("Button");
+    startGameBtn.textContent = "Let's Play";
+    startGameBtnContainer.classList.add("hide");
+    startGameBtnContainer.classList.add("startGameBtnContainer");
+    startGameBtnContainer.appendChild(startGameBtn);
+    startGameBtn.addEventListener("click", () => {
+      game.stage = "gameMode";
+      render();
+    });
+    x.addEventListener("click", () => {
+      game.players[0].setSelection("x");
+      game.players[1].setSelection("o");
+      startGameBtnContainer.classList.remove("hide");
+      x.classList.add("selected");
+      o.classList.remove("selected");
+    });
+
+    o.addEventListener("click", () => {
+      game.players[0].setSelection("o");
+      game.players[1].setSelection("x");
+      startGameBtnContainer.classList.remove("hide");
+      o.classList.add("selected");
+      x.classList.remove("selected");
+    });
+
+    gamePage.append(iconSelectMessage, xoContainer, startGameBtnContainer);
+  };
 
   const render = () => {
     switch (game.stage) {
@@ -205,7 +243,7 @@ const game = (() => {
 
       case "aiMode": {
         gamePage.innerHTML = "";
-        const iconSelectMessage = document.createElement("p");
+
         const human = document.createElement("input");
         human.classList.add("AiInputContainer");
         human.setAttribute("placeholder", "Enter your name");
@@ -215,63 +253,21 @@ const game = (() => {
           const humanName = human.value;
           game.firstPlayer.setName(humanName);
           if (game.firstPlayer.getName()) {
-            iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
-            // eslint-disable-next-line no-use-before-define
-            xoContainer.classList.remove("hide");
+            document.querySelector(
+              ".iconSelectMessage"
+            ).textContent = `${game.firstPlayer.getName()} pick your side:`;
+            document.querySelector(".xoContainer").classList.remove("hide");
           }
         });
 
+        gamePage.appendChild(human);
         game.secondPlayer.setName("Computer");
-
-        // repeat code xo:
-
-        const xoContainer = document.createElement("div");
-        xoContainer.classList.add("xoContainer");
-        const x = document.createElement("button");
-        x.textContent = "x";
-        const o = document.createElement("button");
-        o.textContent = "o";
-        xoContainer.classList.add("hide");
-        xoContainer.append(x, o);
-        const startGameBtnContainer = document.createElement("div");
-        const startGameBtn = document.createElement("Button");
-        startGameBtn.textContent = "Let's Play";
-        startGameBtnContainer.classList.add("hide");
-        startGameBtnContainer.classList.add("startGameBtnContainer");
-        startGameBtnContainer.appendChild(startGameBtn);
-        startGameBtn.addEventListener("click", () => {
-          game.stage = "gameMode";
-          render();
-        });
-        x.addEventListener("click", () => {
-          game.players[0].setSelection("x");
-          game.players[1].setSelection("o");
-          startGameBtnContainer.classList.remove("hide");
-          x.classList.add("selected");
-          o.classList.remove("selected");
-        });
-
-        o.addEventListener("click", () => {
-          game.players[0].setSelection("o");
-          game.players[1].setSelection("x");
-          startGameBtnContainer.classList.remove("hide");
-          o.classList.add("selected");
-          x.classList.remove("selected");
-        });
-
-        game.players[1].setAi(true);
-        gamePage.append(
-          human,
-          iconSelectMessage,
-          xoContainer,
-          startGameBtnContainer
-        );
-
+        game.secondPlayer.setAi(true);
+        appendPlayerSelection();
         break;
       }
       case "twoPlayerMode": {
         gamePage.innerHTML = "";
-        const iconSelectMessage = document.createElement("p");
         const playerInputContainer = document.createElement("div");
         playerInputContainer.classList.add("playerInputContainer");
         const playerOne = document.createElement("input");
@@ -281,9 +277,10 @@ const game = (() => {
           const playerOneName = playerOne.value;
           game.firstPlayer.setName(playerOneName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
-            iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
-            // eslint-disable-next-line no-use-before-define
-            xoContainer.classList.remove("hide");
+            document.querySelector(
+              ".iconSelectMessage"
+            ).textContent = `${game.firstPlayer.getName()} pick your side:`;
+            document.querySelector(".xoContainer").classList.remove("hide");
           }
         });
 
@@ -295,50 +292,15 @@ const game = (() => {
           const playerTwoName = playerTwo.value;
           game.secondPlayer.setName(playerTwoName);
           if (game.firstPlayer.getName() && game.secondPlayer.getName()) {
-            iconSelectMessage.textContent = `${game.firstPlayer.getName()} pick your side:`;
-            // eslint-disable-next-line no-use-before-define
-            xoContainer.classList.remove("hide");
+            document.querySelector(
+              ".iconSelectMessage"
+            ).textContent = `${game.firstPlayer.getName()} pick your side:`;
+            document.querySelector(".xoContainer").classList.remove("hide");
           }
         });
-        const xoContainer = document.createElement("div");
-        xoContainer.classList.add("xoContainer");
-        const x = document.createElement("button");
-        x.textContent = "x";
-        const o = document.createElement("button");
-        o.textContent = "o";
-        xoContainer.classList.add("hide");
-        xoContainer.append(x, o);
-        const startGameBtnContainer = document.createElement("div");
-        const startGameBtn = document.createElement("Button");
-        startGameBtn.textContent = "Let's Play";
-        startGameBtnContainer.classList.add("hide");
-        startGameBtnContainer.classList.add("startGameBtnContainer");
-        startGameBtnContainer.appendChild(startGameBtn);
-        startGameBtn.addEventListener("click", () => {
-          game.stage = "gameMode";
-          render();
-        });
-        x.addEventListener("click", () => {
-          game.players[0].setSelection("x");
-          game.players[1].setSelection("o");
-          startGameBtnContainer.classList.remove("hide");
-          x.classList.add("selected");
-          o.classList.remove("selected");
-        });
 
-        o.addEventListener("click", () => {
-          game.players[0].setSelection("o");
-          game.players[1].setSelection("x");
-          startGameBtnContainer.classList.remove("hide");
-          o.classList.add("selected");
-          x.classList.remove("selected");
-        });
-        gamePage.append(
-          playerInputContainer,
-          iconSelectMessage,
-          xoContainer,
-          startGameBtnContainer
-        );
+        gamePage.appendChild(playerInputContainer);
+        appendPlayerSelection();
 
         break;
       }
@@ -391,7 +353,7 @@ const game = (() => {
                 game.getWinner();
                 render();
                 // if ai mode:
-                if (game.players[1].getIsAI()) {
+                if (game.players[1].getIsAI() && game.stage !== "gameOver") {
                   game.playAiMove();
                   render();
                   game.getWinner();
